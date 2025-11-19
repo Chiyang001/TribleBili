@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哔哩哔哩批量三连工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 4px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .checkbox-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-left: 0 !important;
+                margin-top: 10px;
+            }
+        }
+        
+        .header {
+            padding: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .header p {
+            color: #666;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        
+        .section {
+            padding: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #333;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            font-weight: 400;
+            cursor: pointer;
+        }
+        
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: #333;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            opacity: 0.85;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            opacity: 0.85;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.info {
+            background: #e7f3ff;
+            color: #004085;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .results {
+            margin-top: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border-left: 3px solid #ddd;
+            font-size: 14px;
+        }
+        
+        .result-item.success {
+            border-left-color: #28a745;
+        }
+        
+        .result-item.error {
+            border-left-color: #dc3545;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .sub-options {
+            margin-left: 20px;
+            margin-top: 12px;
+        }
+        
+        .action-summary {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f0f8ff;
+            border-left: 3px solid #333;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .action-summary strong {
+            color: #000;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 13px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .footer a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer a:hover {
+            color: #00a1d6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>哔哩哔哩批量三连工具</h1>
+            <p>一键点赞、投币、收藏你喜欢的视频</p>
+        </div>
+        
+        <!-- 登录区域 -->
+        <div class="section" id="loginSection">
+                <h2>登录信息</h2>
+                <div class="form-group">
+                    <label>SESSDATA:</label>
+                    <input type="text" id="sessdata" placeholder="从浏览器Cookie中获取">
+                    <div class="help-text">按F12打开开发者工具 → Application → Cookies → https://www.bilibili.com</div>
+                </div>
+                <div class="form-group">
+                    <label>bili_jct:</label>
+                    <input type="text" id="bili_jct" placeholder="从浏览器Cookie中获取">
+                </div>
+                <div class="form-group">
+                    <label>buvid3:</label>
+                    <input type="text" id="buvid3" placeholder="从浏览器Cookie中获取">
+                </div>
+            <button class="btn btn-primary" onclick="login()">登录</button>
+            <button class="btn" onclick="clearConfig()" style="background: #6c757d; color: white; margin-left: 10px;">清除保存的配置</button>
+            <div class="status" id="loginStatus"></div>
+        </div>
+        
+        <!-- 操作区域 -->
+        <div class="section hidden" id="operationSection">
+            <h2>操作设置</h2>
+            <div class="help-text" style="margin-bottom: 12px; color: #666;">以下设置将应用于所有三连操作（批量视频和用户视频）</div>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="actionLike" checked>
+                    <label for="actionLike">点赞</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="actionCoin" checked>
+                    <label for="actionCoin">投币</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="actionFavorite" checked>
+                    <label for="actionFavorite">收藏</label>
+                </div>
+            </div>
+            
+            <div class="sub-options">
+                <div class="form-group">
+                    <label>投币数量:</label>
+                    <select id="coinNum">
+                        <option value="1">1个币</option>
+                        <option value="2">2个币</option>
+                    </select>
+                    <div class="help-text">每个视频投币的数量</div>
+                </div>
+                <div class="form-group">
+                    <label>收藏夹:</label>
+                    <select id="favoriteFolder">
+                        <option value="">请选择收藏夹</option>
+                    </select>
+                    <div class="help-text">视频将被收藏到此收藏夹</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 批量视频链接 -->
+        <div class="section hidden" id="videoSection">
+            <h2>批量视频链接</h2>
+            <div class="form-group">
+                <label>视频链接（每行一个）:</label>
+                <textarea id="videoUrls" placeholder="https://www.bilibili.com/video/BV1xx411c7XD&#10;https://www.bilibili.com/video/BV1xx411c7XE"></textarea>
+                <div class="help-text">支持BV号、完整视频链接、短链接</div>
+            </div>
+            <div class="action-summary" id="videoActionSummary"></div>
+            <button class="btn btn-success" onclick="batchTriple()">开始批量三连</button>
+            <div class="status" id="videoStatus"></div>
+            <div class="results" id="videoResults"></div>
+        </div>
+        
+        <!-- 用户视频 -->
+        <div class="section hidden" id="userSection">
+            <h2>用户视频三连</h2>
+            <div class="form-group">
+                <label>用户主页链接或UID:</label>
+                <input type="text" id="userUrl" placeholder="https://space.bilibili.com/123456 或直接输入 123456">
+                <div class="help-text">输入UP主的空间链接或直接输入UID（用户ID）</div>
+            </div>
+            <button class="btn btn-primary" onclick="getUserVideos()">获取用户视频</button>
+            <div class="action-summary hidden" id="userActionSummary"></div>
+            <button class="btn btn-success hidden" id="userTripleBtn" onclick="userTriple()">对所有视频三连</button>
+            <div class="status" id="userStatus"></div>
+            <div class="results" id="userResults"></div>
+        </div>
+        
+        <div class="footer">
+            原作者：<a href="https://space.bilibili.com/404891612?spm_id_from=333.1007.0.0" target="_blank">炽阳001</a>
+        </div>
+    </div>
+
+    <script>
+        let userVideos = [];
+        
+        // 页面加载时自动加载保存的配置
+        window.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const response = await fetch('/api/load_config');
+                const data = await response.json();
+                
+                if (data.success && data.config) {
+                    document.getElementById('sessdata').value = data.config.sessdata || '';
+                    document.getElementById('bili_jct').value = data.config.bili_jct || '';
+                    document.getElementById('buvid3').value = data.config.buvid3 || '';
+                    
+                    // 显示提示
+                    showStatus('loginStatus', '已加载上次保存的登录信息，点击登录按钮继续', 'info');
+                }
+            } catch (error) {
+                console.log('加载配置失败:', error);
+            }
+        });
+        
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+            element.style.display = 'block';
+        }
+        
+        function hideStatus(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+        
+        function updateActionSummary() {
+            const like = document.getElementById('actionLike').checked;
+            const coin = document.getElementById('actionCoin').checked;
+            const favorite = document.getElementById('actionFavorite').checked;
+            const coinNum = document.getElementById('coinNum').value;
+            const favoriteFolder = document.getElementById('favoriteFolder');
+            const favoriteName = favoriteFolder.options[favoriteFolder.selectedIndex]?.text || '未选择';
+            
+            let actions = [];
+            if (like) actions.push('点赞');
+            if (coin) actions.push(`投币(${coinNum}个)`);
+            if (favorite) actions.push(`收藏(${favoriteName})`);
+            
+            const summary = actions.length > 0 
+                ? `<strong>当前操作：</strong>${actions.join(' + ')}` 
+                : '<strong>提示：</strong>请至少选择一个操作';
+            
+            document.getElementById('videoActionSummary').innerHTML = summary;
+            document.getElementById('userActionSummary').innerHTML = summary;
+        }
+        
+        // 监听操作设置变化
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('actionLike')?.addEventListener('change', updateActionSummary);
+            document.getElementById('actionCoin')?.addEventListener('change', updateActionSummary);
+            document.getElementById('actionFavorite')?.addEventListener('change', updateActionSummary);
+            document.getElementById('coinNum')?.addEventListener('change', updateActionSummary);
+            document.getElementById('favoriteFolder')?.addEventListener('change', updateActionSummary);
+        });
+        
+        async function login() {
+            const sessdata = document.getElementById('sessdata').value.trim();
+            const bili_jct = document.getElementById('bili_jct').value.trim();
+            const buvid3 = document.getElementById('buvid3').value.trim();
+            
+            if (!sessdata || !bili_jct || !buvid3) {
+                showStatus('loginStatus', '请填写完整的登录信息', 'error');
+                return;
+            }
+            
+            showStatus('loginStatus', '正在登录...', 'info');
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({sessdata, bili_jct, buvid3})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('loginStatus', '登录成功！', 'success');
+                    document.getElementById('operationSection').classList.remove('hidden');
+                    document.getElementById('videoSection').classList.remove('hidden');
+                    document.getElementById('userSection').classList.remove('hidden');
+                    
+                    // 加载收藏夹
+                    const folderSelect = document.getElementById('favoriteFolder');
+                    folderSelect.innerHTML = '<option value="">请选择收藏夹</option>';
+                    
+                    if (data.folders && data.folders.length > 0) {
+                        data.folders.forEach(folder => {
+                            const option = document.createElement('option');
+                            option.value = folder.id;
+                            option.textContent = `${folder.title} (${folder.media_count || 0}个视频)`;
+                            folderSelect.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = '暂无收藏夹';
+                        folderSelect.appendChild(option);
+                    }
+                    
+                    // 更新操作摘要
+                    updateActionSummary();
+                } else {
+                    showStatus('loginStatus', data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('loginStatus', '登录失败: ' + error.message, 'error');
+            }
+        }
+        
+        async function batchTriple() {
+            const urls = document.getElementById('videoUrls').value.trim().split('\n').filter(u => u.trim());
+            
+            if (urls.length === 0) {
+                showStatus('videoStatus', '请输入至少一个视频链接', 'error');
+                return;
+            }
+            
+            const actions = {
+                like: document.getElementById('actionLike').checked,
+                coin: document.getElementById('actionCoin').checked,
+                coin_num: parseInt(document.getElementById('coinNum').value),
+                favorite: document.getElementById('actionFavorite').checked,
+                favorite_id: document.getElementById('favoriteFolder').value
+            };
+            
+            if (actions.favorite && !actions.favorite_id) {
+                showStatus('videoStatus', '请选择收藏夹', 'error');
+                return;
+            }
+            
+            if (!actions.like && !actions.coin && !actions.favorite) {
+                showStatus('videoStatus', '请至少选择一个操作', 'error');
+                return;
+            }
+            
+            showStatus('videoStatus', `正在处理 ${urls.length} 个视频...`, 'info');
+            document.getElementById('videoResults').innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/triple', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({urls, actions})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('videoStatus', '处理完成！', 'success');
+                    displayResults('videoResults', data.results);
+                } else {
+                    showStatus('videoStatus', data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('videoStatus', '处理失败: ' + error.message, 'error');
+            }
+        }
+        
+        async function getUserVideos() {
+            const userUrl = document.getElementById('userUrl').value.trim();
+            
+            if (!userUrl) {
+                showStatus('userStatus', '请输入用户主页链接', 'error');
+                return;
+            }
+            
+            showStatus('userStatus', '正在获取用户视频...', 'info');
+            document.getElementById('userResults').innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/user_videos', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({user_url: userUrl})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    userVideos = data.videos;
+                    showStatus('userStatus', `找到 ${userVideos.length} 个视频`, 'success');
+                    document.getElementById('userActionSummary').classList.remove('hidden');
+                    document.getElementById('userTripleBtn').classList.remove('hidden');
+                    updateActionSummary();
+                    
+                    const resultsDiv = document.getElementById('userResults');
+                    resultsDiv.innerHTML = userVideos.map(v => 
+                        `<div class="result-item">
+                            <strong>${v.title}</strong><br>
+                            <small>BV号: ${v.bvid}</small>
+                        </div>`
+                    ).join('');
+                } else {
+                    showStatus('userStatus', data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('userStatus', '获取失败: ' + error.message, 'error');
+            }
+        }
+        
+        async function userTriple() {
+            if (userVideos.length === 0) {
+                showStatus('userStatus', '没有可处理的视频', 'error');
+                return;
+            }
+            
+            const urls = userVideos.map(v => `https://www.bilibili.com/video/${v.bvid}`);
+            
+            const actions = {
+                like: document.getElementById('actionLike').checked,
+                coin: document.getElementById('actionCoin').checked,
+                coin_num: parseInt(document.getElementById('coinNum').value),
+                favorite: document.getElementById('actionFavorite').checked,
+                favorite_id: document.getElementById('favoriteFolder').value
+            };
+            
+            if (actions.favorite && !actions.favorite_id) {
+                showStatus('userStatus', '请选择收藏夹', 'error');
+                return;
+            }
+            
+            if (!actions.like && !actions.coin && !actions.favorite) {
+                showStatus('userStatus', '请至少选择一个操作', 'error');
+                return;
+            }
+            
+            showStatus('userStatus', `正在处理 ${urls.length} 个视频...`, 'info');
+            
+            try {
+                const response = await fetch('/api/triple', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({urls, actions})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus('userStatus', '处理完成！', 'success');
+                    displayResults('userResults', data.results);
+                } else {
+                    showStatus('userStatus', data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('userStatus', '处理失败: ' + error.message, 'error');
+            }
+        }
+        
+        function displayResults(elementId, results) {
+            const resultsDiv = document.getElementById(elementId);
+            resultsDiv.innerHTML = results.map(r => {
+                const isSuccess = r.success && Object.values(r.details || {}).every(d => d.success);
+                const details = r.details ? Object.entries(r.details).map(([key, val]) => 
+                    `${key}: ${val.success ? '✓' : '✗'} ${val.message}`
+                ).join(' | ') : '';
+                
+                return `<div class="result-item ${isSuccess ? 'success' : 'error'}">
+                    <strong>${r.bvid || '未知'}</strong><br>
+                    <small>${details || r.message}</small>
+                </div>`;
+            }).join('');
+        }
+        
+        function clearConfig() {
+            if (confirm('确定要清除保存的登录配置吗？')) {
+                document.getElementById('sessdata').value = '';
+                document.getElementById('bili_jct').value = '';
+                document.getElementById('buvid3').value = '';
+                hideStatus('loginStatus');
+                showStatus('loginStatus', '已清除保存的配置', 'info');
+            }
+        }
+    </script>
+</body>
+</html>
